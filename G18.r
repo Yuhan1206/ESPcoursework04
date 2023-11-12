@@ -31,7 +31,7 @@ forward <- function(nn, inp){
   ## Get the number of layers.
   num_layers <- length(h)
   ## Set the node values h for the first layer equal to input values.
-  h[[1]] <- inp
+  h[[1]] <- unlist(inp)
   
   ## Loop over remaining layers.
   for (l in 2:num_layers) {
