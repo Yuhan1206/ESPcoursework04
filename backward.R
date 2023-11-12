@@ -74,10 +74,10 @@ train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
       ##Update parameters
       dW_sum <- Map('+', dW_sum, network$dW)
       db_sum <- Map('+', db_sum, network$db)
-      ##Average gradient
-      dW_change <- Map('*', dW_sum, eta/mb)
-      db_change <- Map('*', db_sum, eta/mb)
     }
+    ##Average gradient
+    dW_change <- Map('*', dW_sum, eta/mb)
+    db_change <- Map('*', db_sum, eta/mb)
     nn$dW <- Map('-', nn$dW, dW_change)
     nn$db <- Map('-', nn$db, db_change)
   }
