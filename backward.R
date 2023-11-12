@@ -42,6 +42,8 @@ backward <- function(nn, k) {
     dh[[l]] <- t(as.matrix(W[[l]])) %*% d
     dW[[l]] <- d %*% t(hl)
   }
+
+  
   
   # Update the network list
   nn$dh <- dh 
@@ -49,3 +51,35 @@ backward <- function(nn, k) {
   nn$db <- db
   return(nn)
 } 
+
+
+train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
+  num_data <- nrow(inp)
+  num_layers <- length(nn$h)
+  for (step in 1:nstep){
+    ##Sample a minibatch of training data
+    sample_index <- sample(1:num_data, mb, replace = TRUE)
+    sample_data <- inp[sample_index, , drop=FALSE]
+    sample_class <- k[sample_index]
+    
+    # Set up storages for the sum of gradients for one step
+    dW_sum <- rep(list(0), num_layers-1)
+    db_sum <- rep(list(0), num_layers-1)
+    
+    for (i in mb){
+      ##Go forward 
+      network <- forward(nn, sample_data[i,])
+      ##Go backward
+      network <- backward(network, sample_class[i])
+      ##Update parameters
+      dW_sum <- Map('+', dW_sum, network$dW)
+      db_sum <- Map('+', db_sum, network$db)
+      ##Average gradient
+      dW_change <- Map('*', dW_sum, eta/mb)
+      db_change <- Map('*', db_sum, eta/mb)
+    }
+    nn$dW <- Map('-', nn$dW, dW_change)
+    nn$db <- Map('-', nn$db, db_change)
+  }
+  return(nn)
+}
