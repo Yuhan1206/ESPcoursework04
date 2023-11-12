@@ -66,7 +66,7 @@ train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
     dW_sum <- rep(list(0), num_layers-1)
     db_sum <- rep(list(0), num_layers-1)
     
-    for (i in mb){
+    for (i in 1:mb){
       ##Go forward 
       network <- forward(nn, sample_data[i,])
       ##Go backward
