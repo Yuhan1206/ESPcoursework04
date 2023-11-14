@@ -104,7 +104,7 @@ train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
   num_layers <- length(nn$h)
   for (step in 1:nstep){
     ##Sample a minibatch of training data
-    sample_index <- sample(1:num_data, mb, replace = TRUE)
+    sample_index <- sample(1:num_data, mb)
     sample_data <- inp[sample_index, , drop=FALSE]
     sample_class <- k[sample_index]
     
@@ -138,17 +138,19 @@ test <- iris[index,1:4]
 training <- iris[-index,1:4]
 k <- iris[-index,6]
 inp=training
-# Set the seed to provide an example in which training has worked and the loss has been substantially reduced from pre- to post-training
-set.seed(n)
 d=c(4,8,7,3)
+set.seed(1)
 nn=netup(d)
 final_network=train(nn,inp,k,eta=0.01,mb=10,nstep=10000)
+
 
 # Define a function to classify the test data
 predict_species <- function(network, test_data) {
   predictions <- sapply(1:nrow(test_data), function(i) {
     output <- forward(network, test_data[i,])
-    predicted_class <- which.max(output$h[[length(output$h)]])
+    last_layer <- as.vector(output$h[[length(output$h)]])
+    p <- exp(last_layer)/sum(exp(last_layer))
+    predicted_class <- which.max(p)
     return(predicted_class)
   })
   return(predictions)
@@ -164,3 +166,4 @@ actual_classes <- iris[index, 6]
 misclassification_rate <- sum(predicted_classes != actual_classes) / length(actual_classes)
 
 print(misclassification_rate)
+
