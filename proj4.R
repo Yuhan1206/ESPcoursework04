@@ -138,8 +138,29 @@ test <- iris[index,1:4]
 training <- iris[-index,1:4]
 k <- iris[-index,6]
 inp=training
+# Set the seed to provide an example in which training has worked and the loss has been substantially reduced from pre- to post-training
+set.seed(n)
 d=c(4,8,7,3)
 nn=netup(d)
 final_network=train(nn,inp,k,eta=0.01,mb=10,nstep=10000)
 
+# Define a function to classify the test data
+predict_species <- function(network, test_data) {
+  predictions <- sapply(1:nrow(test_data), function(i) {
+    output <- forward(network, test_data[i,])
+    predicted_class <- which.max(output$h[[length(output$h)]])
+    return(predicted_class)
+  })
+  return(predictions)
+}
 
+# Classify the test data using the trained network
+predicted_classes <- predict_species(final_network, test)
+
+# The actual label
+actual_classes <- iris[index, 6]
+
+# Compute the misclassification rate
+misclassification_rate <- sum(predicted_classes != actual_classes) / length(actual_classes)
+
+print(misclassification_rate)
