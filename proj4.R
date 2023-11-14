@@ -1,63 +1,65 @@
 # Group member: Yuhan Liu unn: s2589828, Haojia Li unn: s2604554, Xinyi Wang unn:s2529097
-
+# Address of github repo:
 # Team member distribution: All team members participated in discussing plans and debugging code for the whole neural network.
 # Haojia Li: 
 # Yuhan Liu: 
 # Xinyi Wang: 
 
 # A function to initialize network
+
 netup <- function(d) {
-  ## Calculate the number of layers for the network.
+  ## Calculate the number of layers for the network
   num_layers <- length(d)
-  ## Initialize the node value 'h' for each layer. For each element in 'd', create a zero vector of the corresponding length.
-  ## 'h' will be a list where each element is a vector representing the node values of the corresponding layer.
+  ## Initialize the node value 'h' for each layer. For each element in 'd', create a zero vector of the corresponding length
+  ## 'h' will be a list where each element is a vector representing the node values of the corresponding layer
   h <- lapply(d, function(num_nodes) rep(0, num_nodes))
   
-  ## define a function to initialize weight parameter matrix W linking layer l to layer l+1.
+  ## define a function to initialize weight parameter matrix W linking layer l to layer l+1
   initialize_W <- function(d, l){
-    ## Generate W values with U(0, 0.2) random deviates. The length of the vector is the total number of elements in the weight matrix.
+    ## Generate W values with U(0, 0.2) random deviates. The length of the vector is the total number of elements in the weight matrix
     w_values <- runif(d[l]*d[l+1], 0, 0.2)
     ## Convert vectors into a matrix where the number of rows is the number of nodes in the next layer 
-    ## and the number of columns is the number of nodes in the current layer.
+    ## and the number of columns is the number of nodes in the current layer
     w_matrix <- matrix(w_values, d[l+1], d[l])
     return(w_matrix)
   }
   ## Using 'initialize_W' function to initialize all matrix W.
   W <- lapply(1:(num_layers-1), function(l) initialize_W(d, l))
   
-  ## Initialize all offset parameters b linking layer l to l+1 with U(0, 0.2) random deviates.
+  ## Initialize all offset parameters b linking layer l to l+1 with U(0, 0.2) random deviates
   b <- lapply(1:(num_layers-1), function(l) runif(d[l+1], 0, 0.2))
   
-  ## Return a list containing node values(h), weight matrices(W) and offset vectors(b).
+  ## Return a list containing node values(h), weight matrices(W) and offset vectors(b)
   return(list(h = h, W = W, b = b))
 }
 
 
 # A function to update nodes for every new data
-#inp: a vector of input values for the first layer
+# inp: a vector of input values for the first layer
+
 forward <- function(nn, inp){
   ## Extract list h, W and b from nn
   h <- nn$h
   W <- nn$W
   b <- nn$b
-  ## Get the number of layers.
+  ## Get the number of layers
   num_layers <- length(h)
-  ## Set the node values h for the first layer equal to input values.
+  ## Set the node values h for the first layer equal to input values
   h[[1]] <- unlist(inp)
   
-  ## Loop over remaining layers.
+  ## Loop over remaining layers
   for (l in 2:num_layers) {
-    # Use ReLU transform and compute the node values for the current layer.
+    ## Use ReLU transform and compute the node values for the current layer
     h[[l]] <- pmax(0, as.matrix(W[[l-1]]) %*% as.vector(h[[l-1]]) + as.matrix(b[[l-1]]))
   }
-  ## Return the updated network list.
+  ## Return the updated network list
   return(list(h = h, W = W, b = b))
 }
 
 
 
 backward <- function(nn, k) {
-  #k is a scalar(类别)
+  ## k is a scalar(类别)
 
   ## Build a function to calculate the derivatives of L w.r.t hL(the node values for layer l)
   calculate_dh <- function(hL, k){
@@ -102,12 +104,13 @@ backward <- function(nn, k) {
     dW[[l]] <- d %*% t(hl)
   }
   
-  # Update the network list
+  ## Update the network list
   nn$dh <- dh 
   nn$dW <- dW
   nn$db <- db
   return(nn)
 } 
+
 
 train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
   ## Calculate the number of rows and the number of network layers
@@ -145,6 +148,7 @@ train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
   return(nn)
 }
 
+
 ## Convert Species from iris dataset to numerical form
 iris$class <- as.numeric((iris$Species))
 ## Split data into testing data and training data
@@ -159,7 +163,7 @@ k <- iris[-index,6]
 ## Define the structure of the neural network
 inp=training
 d=c(4,8,7,3)
-## set the seed
+## Set the seed
 set.seed(1)
 ## Use the 'netup' function to initialize the neural network
 nn=netup(d)
@@ -167,26 +171,30 @@ nn=netup(d)
 final_network=train(nn,inp,k,eta=0.01,mb=10,nstep=10000)
 
 
-# Define a function to classify the test data
+## Define a function to classify the test data
 predict_species <- function(network, test_data) {
+  ## Use the sapply function to operate on each row of the test data
   predictions <- sapply(1:nrow(test_data), function(i) {
+    ## Use forward function to obtain the network output of the current test sample
     output <- forward(network, test_data[i,])
+    ## Obtain the node values of the output layer and convert them to vector
     last_layer <- as.vector(output$h[[length(output$h)]])
+    ## Calculate the probability for each category
     p <- exp(last_layer)/sum(exp(last_layer))
+    ## Find the class with the highest probability
     predicted_class <- which.max(p)
     return(predicted_class)
   })
   return(predictions)
 }
 
-# Classify the test data using the trained network
+## Classify the test data using the trained network
 predicted_classes <- predict_species(final_network, test)
 
-# The actual label
+## Obtain the actual labels
 actual_classes <- iris[index, 6]
 
-# Compute the misclassification rate
+## Compute the misclassification rate
 misclassification_rate <- sum(predicted_classes != actual_classes) / length(actual_classes)
 
 print(misclassification_rate)
-
