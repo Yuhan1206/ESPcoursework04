@@ -25,12 +25,12 @@ netup <- function(d) {
   ## 'h' will be a list where each element is a vector representing the node values of the corresponding layer
   h <- lapply(d, function(num_nodes) rep(0, num_nodes))
   
-  ## define a function to initialize weight parameter matrix W linking layer l to layer l+1
+  ## A function to initialize weight parameter matrix W linking layer l to layer l+1
   initialize_W <- function(d, l){
     ## Generate W values with U(0, 0.2) random deviates.
     w_values <- runif(d[l]*d[l+1], 0, 0.2)
-    ## Convert vectors into a matrix where the number of rows is the number of nodes in the next layer 
-    ## and the number of columns is the number of nodes in the current layer
+    ## Convert vectors into a matrix where rows number is the nodes number in the next layer 
+    ## and columns number is the nodes number in the current layer
     w_matrix <- matrix(w_values, d[l+1], d[l])
     return(w_matrix)
   }
