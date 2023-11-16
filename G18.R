@@ -64,7 +64,7 @@ forward <- function(nn, inp){
   
   ## Loop over remaining layers 
   for (l in 2:num_layers) {
-  ## Use ReLU transform and compute the node values for the current layer
+    ## Use ReLU transform and compute the node values for the current layer
     h[[l]] <- pmax(0, W[[l-1]] %*% h[[l-1]] + b[[l-1]])
   }
   ## Return the updated network list
@@ -79,7 +79,7 @@ backward <- function(nn, k) {
   #  k - a scalar class of input data
   # Outputs:
   #  a list which contains the h,W,b,dh,dW,db of each layer
-
+  
   ## Extract list h and W from nn
   h <- nn$h  
   W <- nn$W
@@ -92,7 +92,7 @@ backward <- function(nn, k) {
   ## Calculate the derivative of h in the last layer
   dh[[num_layers]] <- exp(h[[num_layers]])/sum(exp(h[[num_layers]]))
   dh[[num_layers]][k] <- dh[[num_layers]][k] - 1
-
+  
   ## Loop backwards to calculate the derivative of each layer
   for (l in (num_layers-1):1){
     ## Extract the node values of the current layer and the next layer
@@ -108,7 +108,6 @@ backward <- function(nn, k) {
     dh[[l]] <- t(as.matrix(W[[l]])) %*% d
     dW[[l]] <- d %*% t(hl)
   }
-  
   ## Update the network list
   nn$dh <- dh 
   nn$dW <- dW
@@ -142,7 +141,7 @@ train <- function(nn,inp,k,eta=0.01,mb=10,nstep=10000){
     # Set up storages for the sum of gradients for one step
     dW_sum <- rep(list(0), num_layers-1)
     db_sum <- rep(list(0), num_layers-1)
-
+    
     ## Loop over each data point in the small batch
     for (i in 1:mb){
       ## Go forward to update all nodes values
@@ -185,17 +184,18 @@ predict_species <- function(network, test_data) {
   })
   return(predictions)
 }
-              
+
+## Built a network for data iris
 ## Convert Species from iris dataset to numerical form
+levels <- levels(iris$Species)
 iris$class <- as.numeric((iris$Species))
 ## Split data into testing data and training data
 ## The test data consists of every 5th row of the iris dataset, starting from row 5
 index <- seq(5,nrow(iris),5)
 test <- as.matrix(iris[index,1:4])
 training <- as.matrix(iris[-index,1:4])
-## Extract the category labels
+## Extract the training category labels
 k <- iris[-index,6]
-              
 ## Define the structure of the neural network
 inp=training
 d=c(4,8,7,3)
@@ -205,11 +205,14 @@ set.seed(1)
 nn=netup(d)
 ## Use the 'train' function to train the neural network
 final_network=train(nn,inp,k,eta=0.01,mb=10,nstep=10000)
-              
+
+## Predict classes for iris
 ## Classify the test data using the trained network
 predicted_classes <- predict_species(final_network, test)
+predicted_levels <- levels[predicted_classes]
 ## Obtain the actual labels
 actual_classes <- iris[index, 6]
-## Compute the misclassification rate
+## Compute predict results and misclassification rate
+predict_results <- data.frame(test,predicted_levels)
 misclassification_rate <- sum(predicted_classes != actual_classes) / length(actual_classes)
 print(misclassification_rate)
