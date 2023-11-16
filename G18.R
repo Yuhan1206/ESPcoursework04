@@ -1,5 +1,5 @@
 # Group member: Yuhan Liu unn: s2589828, Haojia Li unn: s2604554, Xinyi Wang unn:s2529097
-# Address of github repo:
+# Address of github repo: https://github.com/Yuhan1206/ESPcoursework04
 # Team member distribution: All team members participated in discussing plans and debugging code for the whole neural network.
 # Haojia Li: create netup, forward and backward functions and write comments (34%)
 # Yuhan Liu: create backward, train functions and write comments (33%)
