@@ -1,16 +1,16 @@
 # Group member: Yuhan Liu unn: s2589828, Haojia Li unn: s2604554, Xinyi Wang unn:s2529097
 # Address of github repo:
 # Team member distribution: All team members participated in discussing plans and debugging code for the whole neural network.
-# Haojia Li: 
-# Yuhan Liu: 
-# Xinyi Wang: 
+# Haojia Li: create netup, forward and backward functions and write comments (34%)
+# Yuhan Liu: create backward, train functions and write comments (33%)
+# Xinyi Wang: create predict function and write comments (33%)
 
-# This code is used to create a neural network with given nodes number of each layer.
-# First, we initialize the network h,W,b by using uniform random numbers in function netup
-# Then, we update all nodes values when given the input value in function forward
+# This code is used to create a neural network with given nodes number for each layer.
+# First, we initialise the network h, W, and b by using uniform random numbers in function netup.
+# Then, we update all nodes' values when given the input value in function forward.
 # Next, we calculate the gradients of loss function in order to update W and b step by step in funciton backward.
-# After all the pre-work, we train the network using function train 
-# and predict the class of test data using function predict_species
+# After all the pre-work, we train the network using function train
+# and predict the class of test data using function predict_species.
 
 # A function to initialize network
 netup <- function(d) {
@@ -80,23 +80,6 @@ backward <- function(nn, k) {
   # Outputs:
   #  a list which contains the h,W,b,dh,dW,db of each layer
 
-  ## Build a function to calculate the derivatives of h in the last layer L
-  calculate_dh <- function(hL, k){
-    ## Set up a storage for derivatives
-    dhL <- rep(0, length(hL))
-    ## Loop over each node for layer L (the last layer)
-    for (j in 1:length(hL)){
-      ## Calculate the derivative
-      if (j != k){
-        dhL[j] <- exp(hL[j])/sum(exp(hL))
-      } else{
-        dhL[j] <- exp(hL[j])/sum(exp(hL)) - 1
-      }
-    }
-    ## Return a vector of derivatives for layer L
-    return(dhL)    
-  }
-
   ## Extract list h and W from nn
   h <- nn$h  
   W <- nn$W
@@ -106,9 +89,10 @@ backward <- function(nn, k) {
   dh <- list()
   dW <- list()
   db <- list()
-  
   ## Calculate the derivative of h in the last layer
-  dh[[num_layers]] <- calculate_dh(h[[num_layers]], k)
+  dh[[num_layers]] <- exp(h[[num_layers]])/sum(exp(h[[num_layers]]))
+  dh[[num_layers]][k] <- dh[[num_layers]][k] - 1
+
   ## Loop backwards to calculate the derivative of each layer
   for (l in (num_layers-1):1){
     ## Extract the node values of the current layer and the next layer
