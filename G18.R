@@ -60,12 +60,12 @@ forward <- function(nn, inp){
   ## Get the number of layers
   num_layers <- length(h)
   ## Set the node values h for the first layer equal to input values
-  h[[1]] <- unlist(inp)
+  h[[1]] <- inp
   
   ## Loop over remaining layers 
   for (l in 2:num_layers) {
   ## Use ReLU transform and compute the node values for the current layer
-    h[[l]] <- pmax(0, as.matrix(W[[l-1]]) %*% as.vector(h[[l-1]]) + as.matrix(b[[l-1]]))
+    h[[l]] <- pmax(0, W[[l-1]] %*% h[[l-1]] + b[[l-1]])
   }
   ## Return the updated network list
   return(list(h = h, W = W, b = b))
@@ -86,9 +86,9 @@ backward <- function(nn, k) {
   ## Calculate the number of layers for the network
   num_layers <- length(h)  
   ## Set up lists for derivatives w.r.t. the nodes, weights and offsets
-  dh <- list()
-  dW <- list()
-  db <- list()
+  dh <- vector("list", num_layers)
+  dW <- vector("list", num_layers-1)
+  db <- vector("list", num_layers-1)
   ## Calculate the derivative of h in the last layer
   dh[[num_layers]] <- exp(h[[num_layers]])/sum(exp(h[[num_layers]]))
   dh[[num_layers]][k] <- dh[[num_layers]][k] - 1
@@ -96,8 +96,8 @@ backward <- function(nn, k) {
   ## Loop backwards to calculate the derivative of each layer
   for (l in (num_layers-1):1){
     ## Extract the node values of the current layer and the next layer
-    hl <- as.vector(h[[l]])
-    hl_1 <- as.vector(h[[l+1]])
+    hl <- h[[l]]
+    hl_1 <- h[[l+1]]
     ## Calculate the d values using dh in the next layer
     d <- dh[[l+1]]
     d[hl_1 <= 0] <- 0
@@ -176,7 +176,7 @@ predict_species <- function(network, test_data) {
     ## Use forward function to obtain the network output of the current test sample
     output <- forward(network, test_data[i,])
     ## Obtain the node values of the output layer and convert them to vector
-    last_layer <- as.vector(output$h[[length(output$h)]])
+    last_layer <- output$h[[length(output$h)]]
     ## Calculate the probability for each category
     p <- exp(last_layer)/sum(exp(last_layer))
     ## Find the class with the highest probability
@@ -191,8 +191,8 @@ iris$class <- as.numeric((iris$Species))
 ## Split data into testing data and training data
 ## The test data consists of every 5th row of the iris dataset, starting from row 5
 index <- seq(5,nrow(iris),5)
-test <- iris[index,1:4]
-training <- iris[-index,1:4]
+test <- as.matrix(iris[index,1:4])
+training <- as.matrix(iris[-index,1:4])
 ## Extract the category labels
 k <- iris[-index,6]
               
